@@ -22,7 +22,7 @@ pre-commit workflows remain owned by their existing upstream or consumer.
 ## Adopt
 
 Requires common-repo 0.38.2 or newer for local authoring. Pin a published
-release; the examples use the proposed initial tag `v0.1.0`.
+release; the examples use the initial tag `v0.1.0`.
 
 Append to your `.common-repo.yaml`, after existing upstream-specific excludes:
 
@@ -63,10 +63,10 @@ be included, not just the first one.
     ref: v0.1.0
     with:
       - template-vars:
-          GH_APP_ID_SECRET: TEXTLA_BOT_APP_ID
-          GH_APP_KEY_SECRET: TEXTLA_BOT_PK
-          GH_APP_OWNER: textla
-          VALIDATE_PRIVATE_REPOSITORIES: cr-golang
+          GH_APP_ID_SECRET: EXAMPLE_ORG_BOT_APP_ID
+          GH_APP_KEY_SECRET: EXAMPLE_ORG_BOT_PRIVATE_KEY
+          GH_APP_OWNER: example-org
+          VALIDATE_PRIVATE_REPOSITORIES: internal-upstream
 ```
 
 The corresponding organization/repository secrets must contain an App
