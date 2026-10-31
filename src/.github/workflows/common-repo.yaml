@@ -1,0 +1,74 @@
+name: Common-repo
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+  merge_group:
+  workflow_dispatch:
+  workflow_call:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event_name }}-${{ github.head_ref || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    name: Common-repo diff
+    runs-on: ubuntu-latest
+    env:
+      PRIVATE_REPOSITORIES: "__COMMON_REPO__VALIDATE_PRIVATE_REPOSITORIES__"
+      APP_OWNER: "__COMMON_REPO__GH_APP_OWNER__"
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+        with:
+          persist-credentials: false
+
+      - name: Generate read-only token for private upstreams
+        id: upstream-token
+        if: env.PRIVATE_REPOSITORIES != ''
+        uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
+        with:
+          client-id: ${{ secrets.__COMMON_REPO__GH_APP_ID_SECRET__ }}
+          private-key: ${{ secrets.__COMMON_REPO__GH_APP_KEY_SECRET__ }}
+          owner: ${{ env.APP_OWNER }}
+          repositories: ${{ env.PRIVATE_REPOSITORIES }}
+          permission-contents: read
+
+      - name: Authenticate private upstream clones
+        if: env.PRIVATE_REPOSITORIES != ''
+        env:
+          UPSTREAM_TOKEN: ${{ steps.upstream-token.outputs.token }}
+        run: |
+          umask 077
+          config="${RUNNER_TEMP}/common-repo-auth.gitconfig"
+          : > "${config}"
+          git config --file "${config}" include.path "${HOME}/.gitconfig"
+          IFS=',' read -r -a repositories <<< "${PRIVATE_REPOSITORIES}"
+          for repository in "${repositories[@]}"; do
+            repository="${repository//[[:space:]]/}"
+            [[ "${repository}" =~ ^[A-Za-z0-9_.-]+$ ]] || exit 1
+            git config --file "${config}" --add \
+              "url.https://x-access-token:${UPSTREAM_TOKEN}@github.com/${APP_OWNER}/${repository}.insteadOf" \
+              "https://github.com/${APP_OWNER}/${repository}"
+          done
+          echo "GIT_CONFIG_GLOBAL=${config}" >> "${GITHUB_ENV}"
+
+      - name: Install common-repo
+        uses: common-repo/setup-common-repo@887d2b31e6678fb650d1b1b6fb6097afa5528310 # v1.0.1
+        with:
+          version: __COMMON_REPO__COMMON_REPO_VERSION__
+
+      - name: Validate configuration
+        run: common-repo validate
+
+      - name: Check managed files
+        run: common-repo diff
+
+      - name: Remove private upstream credentials
+        if: always() && env.PRIVATE_REPOSITORIES != ''
+        run: rm -f "${RUNNER_TEMP}/common-repo-auth.gitconfig"

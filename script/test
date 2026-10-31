@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+set -euo pipefail
+cd "$(dirname "$0")/.."
+common-repo validate
+common-repo diff
+python3 -m unittest discover -s tests -v

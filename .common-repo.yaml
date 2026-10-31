@@ -1,0 +1,33 @@
+# Self: authoring tools plus the same validation workflow consumers receive.
+- self:
+  - repo:
+      url: https://github.com/common-repo/upstream
+      ref: v2.2.2
+      with:
+        - exclude: [".github/workflows/ci.yaml"]
+        - template-vars:
+            GH_APP_ID_SECRET: COMMON_REPO_BOT_CLIENT_ID
+            GH_APP_KEY_SECRET: COMMON_REPO_BOT_PRIVATE_KEY
+            GH_APP_OWNER: common-repo
+  - include: ["src/**"]
+  - template: ["src/.github/workflows/common-repo.yaml"]
+  - rename:
+      - "^src/(.*)$": "$1"
+  - template-vars:
+      GH_APP_ID_SECRET: COMMON_REPO_BOT_CLIENT_ID
+      GH_APP_KEY_SECRET: COMMON_REPO_BOT_PRIVATE_KEY
+      GH_APP_OWNER: common-repo
+      VALIDATE_PRIVATE_REPOSITORIES: ""
+      COMMON_REPO_VERSION: v0.38.2
+
+# Source API: export only validation, never a consumer's build/test CI.
+- template-vars:
+    GH_APP_ID_SECRET: COMMON_REPO_BOT_CLIENT_ID
+    GH_APP_KEY_SECRET: COMMON_REPO_BOT_PRIVATE_KEY
+    GH_APP_OWNER: common-repo
+    VALIDATE_PRIVATE_REPOSITORIES: ""
+    COMMON_REPO_VERSION: v0.38.2
+- include: ["src/**"]
+- template: ["src/.github/workflows/common-repo.yaml"]
+- rename:
+    - "^src/(.*)$": "$1"
