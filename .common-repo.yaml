@@ -2,7 +2,7 @@
 - self:
   - repo:
       url: https://github.com/common-repo/upstream
-      ref: v2.2.2
+      ref: v2.3.0
       with:
         - exclude: [".github/workflows/ci.yaml"]
         - template-vars:
