@@ -2,6 +2,14 @@
 All notable changes to this project will be documented in this file. See [conventional commits](https://www.conventionalcommits.org/) for commit guidelines.
 
 - - -
+## v0.3.0 - 2026-11-03
+#### Features
+- (**common-repo**) update upstream to v2.3.0 - (6676377) - jathanism
+#### Documentation
+- use generic organization values in private-upstream example - (508d897) - jathanism
+
+- - -
+
 ## v0.2.0 - 2026-10-31
 #### Features
 - add standalone managed-file validation upstream - (d065b2d) - Jathan McCollum
